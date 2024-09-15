@@ -1,0 +1,913 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <meta name="author" content="Бекмансуров Рустам">
+        <title>images editor</title>
+        <style>
+        .page {
+        height: auto;
+        width: auto;
+        display: flex;
+        position: relative;
+        justify-content: center;
+      }
+      .uploader {
+        width: 800px;
+        height: 500px;
+        margin-top: 7%;
+        border: 2px dashed rgb(193, 193, 193);
+        position: absolute;
+        text-align: center;
+        }
+        #upload-photo {
+        opacity: 0;
+        position: absolute;
+        z-index: -1;
+        }
+
+        .panel {
+            left:0%;
+            display: none;
+            height: auto;
+            width: auto;
+            position: absolute;
+        }
+        .filters{
+            display: none;
+            position: absolute;
+            width: auto;
+            height: auto;
+            background-color:blueviolet;
+            right: 10%;
+        }
+        .button{
+            width: 140px;
+            height: 40px;
+            cursor: pointer;
+            color:rgb(126, 107, 213);
+            border: 0;
+            background-color: rgb(255, 255, 255);
+            position: relative;
+        }
+        .settingsButton{
+            width: 32px;
+            height: 32px;
+            cursor: pointer;
+            background-image: url('/main/main/1.png');
+        }
+        .change_table{
+
+            display: none;
+            width: auto;
+            height: auto;
+            margin-top: 10%;
+            background-color: #ffffff;
+            position: absolute;
+            text-align: center
+
+        }
+        
+        .change_settings_button{
+            height: 50px;
+            width: 200px;
+        }
+        .person_color_button{
+            width:200px;
+            height: 50px; 
+        }
+        .color_button_save{
+            width:200px;
+            height: 50px;
+        }
+        .settings_window{
+
+            display: none;
+            width: 800px;
+            height: 400px;
+            margin-top: 10%;
+            background-color: #ffffff;
+            position: absolute;
+            text-align: center
+
+        }
+        .change_button{
+            width:800px;
+            height:100px;
+        }
+        .combobox{
+            height: 50px;
+            width: 200px;
+        }
+        .image_size{
+            width: auto;
+            height: auto;
+            background-color: #b4419f;
+            position: absolute;
+            display: none;
+            right: 10%;
+            top: 10%;
+        }
+        .conteiner {
+            width: 1000px;
+            height: 700px;
+            display: none;
+            position: relative;
+            background-color: #d4d4d4;
+            overflow: hidden;
+            justify-content: center;
+            align-items: center;
+        }
+        .editor {
+            margin-left: auto;
+            margin-right: auto;
+            display: none;
+            position: absolute;
+            justify-content: center;
+            background-size: cover;
+        }
+        .down_panel{
+            bottom: 5%;
+            display: none;
+            /* position: relative; */
+            height: 50px;
+            width: auto;
+            position: absolute;
+            /* background-color: #000000; */
+        }
+        .image_changer_panel{
+            right: 0%;
+            display: none;
+            /* position: relative; */
+            height: auto;
+            width: auto;
+            position: absolute;
+        }
+        .warning_label{
+            margin-top: 19%;
+            display: none;
+            text-align: center;
+            padding: 20px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            background-color: #f9f9f9;
+
+        }
+        .warning_button{
+            padding: 10px 20px;
+            background-color: #007bff;
+            color: #fff;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        </style>
+    </head>
+    <body class="page" id="background",>
+        <div class="conteiner" id="conteiner">
+            <canvas class="editor" id="editor"></canvas> <br>
+            <div class="down_panel" id="down_panel">
+                <span>
+                    <button class="button" id="get_original_image" style="background-color: #d4d4d4; width: auto; color:#201f1f">Revert to Original</button>
+                    <span>
+                        <button class="button" id="undo" style=" width: 40px;">undo</button>
+                        <button class="button" id="rendo" style=" width: 40px;">rendo</button>
+                    </span>
+                    <button class="button" id="return_to_uploader" style="background-color: #ffffff; width: auto; color:#201f1f">Cancel</button>
+                    <button class="button" id="button_save" style="background-color: #57ccf7; width: auto; color:#ffffff">Save</button>
+
+                </span>
+            </div>
+        </div>
+        <div class="warning_label" id="wrong_type_file">
+            <span>
+                Incorrect file type selected<br>
+                <button class="warning_button" id="confirm_wrong_type">Ok</button>
+            </span>
+        </div>
+        <div class="uploader" id="uploader">
+            <label for="fileInput" style="margin-top: 30%; margin-left: 42%; position: absolute; color:rgb(0, 0, 0); text-align: center">+<br>Drop file to upload<br>or select file</label>
+            <input type="file" id="fileInput" accept="image/png,image/jpeg" style="width: 100%; height: 100%; opacity: 0; ">
+        </div>
+        
+        <div class="panel" id="panel">
+            <span>
+                <button class="button" id="cut_image">Crop</button><br>
+                <button class="button" id="button_change_image_size">Resize</button><br>
+                <button class="button" id="button_change_image_filters">Filters</button><br>
+                <button class="button" id="button_add_rect">Add rectangle</button> <br>
+                <button class="button" id="button_add_circle">Add cirlce</button> <br>
+                <button class="button" id="button_add_text">Add text</button> <br>
+                <button class="button" id="button_remove_active_object" disabled="disabled">Remove object</button><br>
+                <button class="button" id="settings">Settings</button><br>
+            </span>
+        </div>
+        <div class="settings_window" id="settings_window">
+            <span>
+                <button class="change_button" id="change_settings_rect">Rectangle settings</button> <br>
+                <button class="change_button" id="change_settings_circle">Cirlce settings</button> <br>
+                <button class="change_button" id="change_font_type">Font settings</button>
+                <button class="change_button" id="settings_back">Back</button>
+            </span>
+        </div>
+    <div class="image_changer_panel" id="image_changer_panel">
+        <div class="image_size" id="image_cut">
+            <span>
+                <div id="proportion">Choose cut mode<br>
+                    <span>
+                        <input type="radio" id="cut_1_1" name="cut_mode">
+                        <label for="cut_1_1">1:1</label><br>
+                        <input type="radio" id="cut_4_3" name="cut_mode">
+                        <label for="proportions_save_false">4:3</label><br>
+                        <input type="radio" id="cut_16_9" name="cut_mode">
+                        <label for="proportions_save_true">16:9</label><br>
+                    </span>
+                </div> <br>
+                <button class="button" id="save_cut_image">Cut image</button> <br>
+                <button class="button" id="cancel_cut_image">Cancel</button>
+            </span>
+        </div>
+        <div class="image_size" id="image_size">
+            <span>
+                <label>Write image width</label><br>
+                <input type="number" id="image_width" value="0" style="width: 130px;"> <br>
+                <label>Write image height</label><br>
+                <input type="number" id="image_height" value="0" style="width: 130px;"> <br>
+                <div id="proportion"> Save proportions? <br>
+                    <span>
+                        <input type="radio" id="proportions_save_true" name="proportions_save" value="true" checked>
+                        <label for="proportions_save_true">Yes</label><br>
+                        <input type="radio" id="proportions_save_false" name="proportions_save" value="false">
+                        <label for="proportions_save_false">No</label><br>
+                    </span>
+                </div> <br>
+                <button class="button" id="save_image_size">Change image</button> <br>
+                <button class="button" id="cancel_image_size">Cancel</button>
+            </span>
+        </div>
+        <div class="filters" id="image_filters">
+            <span>
+                <label>Change bright</label><br>
+                <input type="range" min="-100" max="100" value="0" id="bright"> <br>
+                <label>Change contrast</label><br>
+                <input type="range" min="-100" max="100" value="0" id="contrast"> <br>
+                <label>Change saturation</label><br>
+                <input type="range" min="-100" max="100" value="0" id="saturation"> <br>
+                <button class="button" id="save_filters">Save filters</button> <br>
+                <button class="button" id="cancel_filters">Cancel</button> <br>
+            </span>
+        </div>
+    </div>
+        <div class="change_table" id="font_type_table">
+            <span>
+                <div id="font_color_size">
+                    <span>
+                        <select class="combobox" id="font_family">
+                            <option value="arial black">arial black</option>
+                            <option value="Times New Roman">Times New Roman</option>
+                            <option value="Calibri">Calibri</option>
+                            <option value="MS Gothic">MS Gothic</option>
+                            <option value="Constantia">Constantia</option>
+                        </select> <br>
+                        <select class="combobox" id="font_color">
+                            <option value="#FF0000" style="background-color: #FF0000;">red</option>
+                            <option value="#0000FF" style="background-color: #0000FF;">blue</option>
+                            <option value="#008000" style="background-color: #008000;">green</option>
+                            <option value="#FFFFFF" style="background-color: #FFFFFF;">white</option>
+                            <option value="#000000" style="background-color: #000000;">black</option>
+                        </select> <br>
+                        <select class="combobox" id="font_size">
+                            <option value="8">8</option>
+                            <option value="9">9</option>
+                            <option value="10">10</option>
+                            <option value="11">11</option>
+                            <option value="12">12</option>
+                            <option value="14">14</option>
+                            <option value="16">16</option>
+                            <option value="18">18</option>
+                            <option value="20">20</option>
+                            <option value="24">24</option>
+                        </select> <br>
+                        <button class="change_settings_button" id="font_person_color_button"> Choose your color</button> <br>
+                        <button class="change_settings_button" id="font_person_pos_button"> Choose position</button> <br>
+                        <button class="change_settings_button" id="save_font_settings"> Save</button> <br>
+                        <button class="change_settings_button" id="cancel_font_settings">Cancel</button> <br>
+                    </span> 
+                </div>
+                <div id="personal_color_font" style="display: none;">
+                    <span>
+                        <input type="text" id="font_color_text" style="width: 400px; height: 40px" > <br>
+                        <button class="color_button_save" id="save_color_font">Save color</button>
+                        <button class="color_button_save" id="canel_color_font">Cancel</button>
+                    </span>
+                </div>
+                <div id="font_pos" style="display: none;">
+                    <span>
+                        <input type="number" id="font_pos_left" width="400px" height="50px"> <br>
+                        <input type="number" id="font_pos_top" width="400px" height="50px"> <br>
+                        <button class="color_button_save" id="save_pos_font">Save position</button>
+                        <button class="color_button_save" id="cancel_pos_font">Cancel</button>
+                    </span>
+                </div>
+            </span>
+        </div>
+        <div class="change_table" id="rect_color_table">
+            <span>
+                <div id="colors_rect">
+                    <select class="combobox" id="rect_color">
+                        <option value="#FF0000" style="background-color: #FF0000;">red</option>
+                        <option value="#0000FF" style="background-color: #0000FF;">blue</option>
+                        <option value="#008000" style="background-color: #008000;">green</option>
+                        <option value="#FFFFFF" style="background-color: #FFFFFF;">white</option>
+                        <option value="#000000" style="background-color: #000000;">black</option>
+                    </select> <br>
+                    <button class="change_settings_button" id="rect_color_save" style="background-color: #008000;">Save color</button> <br>
+                    <button class="change_settings_button" id="rect_color_cancel" style="background-color: #FFFFFF;">Cancel</button> <br>
+                    <button class="person_color_button" id="rect_person_color_button">Choose your own color</button>
+                    <button class="person_color_button" id="rect_person_pos_button">Choose position</button>
+                </div>
+                <div id="personal_color_rect" style="display: none;">
+                    <span>
+                        <input type="text" id="rect_color_text" style="width: 400px; height: 40px" > <br>
+                        <button class="color_button_save" id="save_color_rect">Save color</button>
+                        <button class="color_button_save" id="canel_color_rect">Cancel</button>
+                    </span>
+                </div>
+                <div id="rect_pos" style="display: none;">
+                    <span>
+                        <input type="number" id="rect_pos_left" width="400px" height="50px"> <br>
+                        <input type="number" id="rect_pos_top" width="400px" height="50px"> <br>
+                        <button class="color_button_save" id="save_pos_rect">Save position</button>
+                        <button class="color_button_save" id="cancel_pos_rect">Cancel</button>
+                    </span>
+            </div>
+            </span> 
+        </div>
+        <div class="change_table" id="circle_color_table">
+            <span>
+                <div id="colors_circle">
+                    <select class="combobox" id="colors_circle_choice">
+                        <option value="#FF0000" style="background-color: #FF0000;">red</option>
+                        <option value="#0000FF" style="background-color: #0000FF;">blue</option>
+                        <option value="#008000" style="background-color: #008000;">green</option>
+                        <option value="#FFFFFF" style="background-color: #FFFFFF;">white</option>
+                        <option value="#000000" style="background-color: #000000;">black</option>
+                    </select> <br>
+                    <button class="change_settings_button" id="circle_color_save" style="background-color: #008000;">Save color</button> <br>
+                    <button class="change_settings_button" id="circle_color_cancel" style="background-color: #FFFFFF;">Cancel</button> <br>
+                    <button class="person_color_button" id="circle_person_color_button">Choose your own color</button>
+                    <button class="person_color_button" id="circle_person_pos_button">Choose position</button>
+                </div>
+                <div id="personal_color_circle" style="display: none;">
+                    <span>
+                        <input type="text" id="circle_color_text" style="width: 400px; height: 40px" > <br>
+                        <button class="color_button_save" id="save_color_circle">Save color</button>
+                        <button class="color_button_save" id="canel_color_circle">Cancel</button>
+                    </span>
+                </div>
+                <div id="circle_pos" style="display: none;">
+                    <span>
+                        <input type="number" id="circle_pos_left" width="400px" height="50px"> <br>
+                        <input type="number" id="circle_pos_top" width="400px" height="50px"> <br>
+                        <button class="color_button_save" id="save_pos_circle">Save position</button>
+                        <button class="color_button_save" id="cancel_pos_circle">Cancel</button>
+                    </span>
+            </div>
+            </span> 
+        </div>
+        <div class="warning_label" id="empty_input_fields">
+            <span>
+                Wrong image size<br>
+                <button class="warning_button" id="confirm_empty_files">Ok</button>
+            </span>
+        <script src="https://code.jquery.com/jquery-3.7.1.js"
+        integrity="sha256-eKhayi8LEQwp4NKxN+CfCh+3qOVUtJn3QNZ0TciWLP4="
+        crossorigin="anonymous"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/fabric.js/5.3.1/fabric.min.js"></script>
+        <script>
+            var Img
+            var fileInput = document.getElementById('fileInput');
+            var uploaded = false;
+            var circle_color = 'black';
+            var rect_color = 'black';
+            var fontColor = 'black';
+            var fontType = 'arial black';
+            var fontSize = 8;
+            var fontLeft = 0;
+            var fontTop = 0;
+            var rectPosLeft = 0;
+            var rectPosTop = 0;
+            var circlePosLeft = 0;
+            var circlePosTop = 0;
+            var undo_rendo = [];
+            fileInput.addEventListener('change', (e) => {
+                var check = e.target.files[0]
+                switch(check.type){
+                    case 'image/png': uploaded = true;
+                    break;
+                    case 'image/jpeg': uploaded = true;
+                    break;
+                    default:
+                        document.getElementById('uploader').style.display = 'none';
+                        document.getElementById('wrong_type_file').style.display = 'flex';
+                        $('#confirm_wrong_type').on('click', function(){
+                        document.getElementById('uploader').style.display = 'block';
+                        document.getElementById('wrong_type_file').style.display = 'none';
+                    });
+                };
+            if (uploaded === true){
+                uploaded = false;
+                var fileInfo = e.target.files[0];
+                var url = URL.createObjectURL(fileInfo);
+                var img = new Image();
+                img.onload = function() {
+                    console.log('Image width:', img.width);
+                    console.log('Image height:', img.height);
+                };
+                img.src = url;
+                document.getElementById('uploader').style.display = 'none';
+                document.getElementById('panel').style.display = 'block';
+                document.getElementById('down_panel').style.display = 'block';
+                document.getElementById('editor').style.display = 'inline-block';
+                document.getElementById('image_changer_panel').style.display = 'block';
+                document.getElementById('conteiner').style.display = 'flex';
+                var canvas = new fabric.Canvas('editor', {isDrawingMode: false});
+                fabric.Image.fromURL(url, function(img) {
+                    let coeff = img.width / img.height;
+                    var new_width, new_height;
+
+                    if (img.width > 1000 || img.height > 500) {
+                        if (img.width / 1000 > img.height / 500) {
+                            new_width = 1000;
+                            new_height = 1000 / coeff;
+                        } else {
+                            new_height = 500;
+                            new_width = 500 * coeff;
+                        }
+
+                        canvas.setWidth(new_width);
+                        canvas.setHeight(new_height);
+                        img.scaleToWidth(new_width);
+                        img.scaleToHeight(new_height);
+                    } else {
+                        canvas.setWidth(img.width);
+                        canvas.setHeight(img.height);
+                        img.scaleToWidth(img.width);
+                        img.scaleToHeight(img.height);
+                    }
+                    
+                    
+                    
+                    console.log('width:'+ new_width);
+                    console.log('height:'+ new_height);
+                    canvas.setBackgroundImage(img, canvas.renderAll.bind(canvas));
+                    let brightness = new fabric.Image.filters.Brightness({
+                        brightness: 0
+                    });
+                    let contrast = new fabric.Image.filters.Contrast({ 
+                        contrast: 0 
+                    });
+                    let saturation = new fabric.Image.filters.Saturation({ 
+                        saturation: 0
+                    });
+                    img.filters.push(brightness);
+                    img.filters.push(contrast);
+                    img.filters.push(saturation);
+                    img.applyFilters();
+                    canvas.renderAll();
+                    $('#return_to_uploader').on('click', function(){  	
+                        location.reload();
+                });
+                $('#get_original_image').on('click', function(){
+                    fabric.Image.fromURL(url, function(img) {
+                    let coeff = img.width / img.height;
+                    let new_width, new_height;
+
+                    if (img.width > 1000 || img.height > 500) {
+                        if (img.width / 1000 > img.height / 500) {
+                            new_width = 1000;
+                            new_height = 1000 / coeff;
+                        } else {
+                            new_height = 500;
+                            new_width = 500 * coeff;
+                        }
+
+                        canvas.setWidth(new_width);
+                        canvas.setHeight(new_height);
+                        img.scaleToWidth(new_width);
+                        img.scaleToHeight(new_height);
+                    } else {
+                        canvas.setWidth(img.width);
+                        canvas.setHeight(img.height);
+                        img.scaleToWidth(img.width);
+                        img.scaleToHeight(img.height);
+                    }
+                    
+                    console.log(canvas.backgroundImage.width);
+                    console.log(canvas.backgroundImage.height);
+                    document.getElementById('conteiner').style.width = '1000px';
+                    document.getElementById('conteiner').style.height = '700px';
+                    canvas.clear();
+                    
+                    canvas.setBackgroundImage(img, canvas.renderAll.bind(canvas),{
+                        stretchToFit: false
+
+                    });
+                    let brightness = new fabric.Image.filters.Brightness({
+                        brightness: 0
+                    });
+                    let contrast = new fabric.Image.filters.Contrast({ 
+                        contrast: 0 
+                    });
+                    let saturation = new fabric.Image.filters.Saturation({ 
+                        saturation: 0
+                    });
+                    img.filters.push(brightness);
+                    img.filters.push(contrast);
+                    img.filters.push(saturation);
+                    img.applyFilters();
+                    
+                    canvas.renderAll();
+                });
+            });
+                $('#button_save').on('click', function(){
+                    var dataUrl = canvas.toDataURL('image/png');
+                    const link = document.createElement('a');
+                    link.href = dataUrl;
+                    link.download = 'changed_image.png';
+                    document.body.appendChild(link);
+                    link.click();
+                    document.body.removeChild(link); 
+                });
+                
+                $('#button_change_image_size').on('click', function(){
+                    document.getElementById("image_size").style.display = 'flex';
+                });
+                $('#save_image_size').on('click', function() {
+                    document.getElementById("image_size").style.display = 'none';
+
+                    // Получение новых размеров
+                    let new_width_input = Number(document.getElementById("image_width").value);
+                    let new_height_input = Number(document.getElementById("image_height").value);
+
+                    if (new_width_input > 0 && new_height_input > 0) {
+                    // Получение текущих размеров изображения
+                    let imgWidth = canvas.backgroundImage.width;
+                    let imgHeight = canvas.backgroundImage.height;
+
+                    // Вычисление нового соотношения
+                    let new_ratio = imgWidth / imgHeight;
+
+                    // Элементы для отображения состояния сохранения пропорций
+                    let proportions_true = document.getElementById('proportions_save_true');
+                    let proportions_false = document.getElementById('proportions_save_false');
+
+                    // Проверка сохранения пропорций
+                    if (proportions_true.checked){
+                        if (new_width_input / new_height_input !== new_ratio) {
+                        // Сохранение пропорций
+                            if (imgWidth > imgHeight) {
+                                new_height_input = new_width_input / new_ratio;
+                            } else {
+                                new_width_input = new_height_input * new_ratio;
+                            }
+                        }
+                        document.getElementById('conteiner').style.width = new_width_input + 'px';
+                        document.getElementById('conteiner').style.height = new_height_input + 'px';
+
+                        // Обновление размера изображения на canvas
+                        canvas.backgroundImage.scaleToWidth(new_width_input);
+                        canvas.backgroundImage.scaleToHeight(new_height_input);
+
+                        // Обновление размеров элемента editor
+                        document.getElementById('editor').width = new_width_input;
+                        document.getElementById('editor').height = new_height_input;
+
+                        // Обновление размеров canvas
+                        canvas.setWidth(new_width_input);
+                        canvas.setHeight(new_height_input);
+
+                    } else if(proportions_false.checked){
+                        canvas.backgroundImage.scaleToWidth(new_height_input);
+                        canvas.backgroundImage.scaleToHeight(new_height_input);
+                        canvas.setWidth(new_width_input);
+                        canvas.setHeight(new_height_input)
+                        
+                    }
+                    
+                    canvas.requestRenderAll();
+                    document.getElementById('empty_input_fields').style.display = 'none';
+                    } else {
+                        document.getElementById('empty_input_fields').style.display = 'flex';
+                        document.getElementById('conteiner').style.display = 'none';
+                        document.getElementById('panel').style.display = 'none';
+                    }
+                    
+
+                });
+                $('#confirm_empty_files').on('click', function(){
+                    document.getElementById('empty_input_fields').style.display = 'none';
+                    document.getElementById('conteiner').style.display = 'flex';
+                    document.getElementById('panel').style.display = 'block';
+                });
+
+
+                $('#cancel_image_size').on('click', function(){
+                    document.getElementById("image_size").style.display = 'none';
+                    document.getElementById('empty_input_fields').style.display = 'none';
+                });
+                $('#cut_image').on('click', function(){
+                    document.getElementById("image_cut").style.display = 'flex';
+                });
+                $('#save_cut_image').on('click', function(){
+                    document.getElementById("image_cut").style.display = 'none';
+                    let cut_1_1 = document.getElementById('cut_1_1');
+                    let cut_4_3 = document.getElementById('cut_4_3');
+                    let cut_16_9 = document.getElementById('cut_16_9');
+                    let new_height_cut;
+                    let new_width_cut
+                    let coefficient;
+                        if(cut_1_1.checked){
+                            let size = Math.min(new_height, new_width);
+                            console.log(size);
+                            canvas.setWidth(size);
+                            canvas.setHeight(size);
+                    } else if (cut_4_3.checked){
+                        coefficient = 4/3;
+                        new_height_cut = new_height;
+                        new_width_cut = new_width;
+                        if (new_width_cut / new_height_cut > coefficient) {
+                                new_width_cut = new_height_cut * coefficient;
+                                canvas.setWidth(new_width_cut);
+                                canvas.setHeight(new_height_cut);
+                            } else {
+                                new_height_cut = new_width_cut / coefficient;
+                                canvas.setWidth(new_width_cut);
+                                canvas.setHeight(new_height_cut);
+                            }
+                    } else if (cut_16_9.checked){
+                        coefficient = 16/9;
+                        new_height_cut = new_height;
+                        new_width_cut = new_width;
+                        if (new_width_cut / new_height_cut > coefficient) {
+                                new_width_cut = new_height_cut * coefficient;
+                                canvas.setWidth(new_width_cut);
+                                canvas.setHeight(new_height_cut);
+                            } else {
+                                new_height_cut = new_width_cut / coefficient;
+                                canvas.setWidth(new_width_cut);
+                                canvas.setHeight(new_height_cut);
+                            }
+                    }
+                });
+                $('#cancel_cut_image').on('click', function(){
+                    document.getElementById("image_cut").style.display = 'none';
+                });
+                $('#button_change_image_filters').on('click', function(){
+                    document.getElementById("image_filters").style.display = 'flex';
+                });
+                $('#save_filters').on('click', function(){
+                    document.getElementById("image_filters").style.display = 'none';
+                    let new_bright = document.getElementById('bright').value;
+                    let new_contrast = document.getElementById('contrast').value;
+                    let new_saturation = document.getElementById('saturation').value;
+                    new_bright = new_bright/100;
+                    new_contrast = new_contrast/100;
+                    new_saturation = new_saturation/100;
+                    canvas.backgroundImage.filters = [];
+                    let brightness = new fabric.Image.filters.Brightness({
+                        brightness: new_bright
+                    });
+                    let contrast = new fabric.Image.filters.Contrast({ 
+                        contrast: new_contrast 
+                    });
+                    let saturation = new fabric.Image.filters.Saturation({ 
+                        saturation: new_saturation
+                    });
+                    canvas.backgroundImage.filters.push(brightness);
+                    canvas.backgroundImage.filters.push(contrast);
+                    canvas.backgroundImage.filters.push(saturation);
+                    canvas.backgroundImage.applyFilters();
+                    canvas.renderAll();    
+                });
+                $('#cancel_filters').on('click', function(){
+                    document.getElementById("image_filters").style.display = 'none';
+                });
+                $('#button_add_rect').on('click', function(){
+                    var rectangle = new fabric.Rect({
+                        left: rectPosLeft,
+                        top: rectPosTop,
+                        width: 40,
+                        height: 60,
+                        fill: rect_color,
+                    });
+                    canvas.add(rectangle);
+                });
+                $('#button_add_circle').on('click', function(){
+                    const circle = new fabric.Circle({
+                        left: circlePosLeft,
+                        top: circlePosTop,
+                        radius: 30,
+                        fill: circle_color,
+                    });
+                    canvas.add(circle);
+                });
+                $('#button_add_text').on('click', function(){
+                    var text = new fabric.IText('text',{
+                        left: fontLeft,
+                        top: fontTop,
+                        objecttype: 'text',
+                        fontFamily: fontType,
+                        fill: fontColor,
+                        fontSize: fontSize,
+                    });
+                    canvas.add(text);
+                });
+                $('#button_remove_active_object').on('click', function(){
+                    canvas.remove(canvas.getActiveObject())
+                });
+                canvas.on('selection:created', function(){
+                    $('#button_remove_active_object').prop('disabled', '')
+                });
+                canvas.on('selection:cleared', function(){
+                    $('#button_remove_active_object').prop('disabled', 'disabled')
+                });
+                $('#settings').on('click', function(){
+                    document.getElementById('settings_window').style.display = 'flex';
+                });
+                $('#change_font_type').on('click', function(){
+                    document.getElementById('font_type_table').style.display = 'flex';
+                    document.getElementById('font_color_size').style.display = 'flex';
+                    $('#save_font_settings').on('click', function(){
+                    let font = document.getElementById('font_family');
+                    let font_size = document.getElementById('font_size');
+                    let font_color = document.getElementById('font_color');
+                    fontSize = Number(font_size.value);
+                    fontType = font.value;
+                    fontColor = font_color.value;
+                    document.getElementById('settings_window').style.display = 'none';
+                    document.getElementById('font_type_table').style.display = 'none';
+                    })
+                    $('#cancel_font_settings').on('click', function(){
+                    document.getElementById('font_type_table').style.display = 'none';
+                    })
+                    $('#font_person_color_button').on('click', function(){
+                    document.getElementById('settings_window').style.display = 'none';
+                    document.getElementById('font_color_size').style.display = 'none';
+                    document.getElementById('personal_color_font').style.display = 'flex';
+                    document.getElementById('font_pos').style.display = 'none';
+                })
+                    $('#save_color_font').on('click', function(){
+                    let color = document.getElementById('font_color_text').value;
+                    if (color.includes('#')){
+                        fontColor = color;
+                    }
+                    document.getElementById('settings_window').style.display = 'none';
+                    document.getElementById('personal_color_font').style.display = 'none';
+                    })
+                    $('#canel_color_font').on('click', function(){
+                    document.getElementById('settings_window').style.display = 'none';
+                    document.getElementById('personal_color_font').style.display = 'none';
+                    })
+                    $('#font_person_pos_button').on('click', function(){
+                    document.getElementById('settings_window').style.display = 'none';
+                    document.getElementById('font_color_size').style.display = 'none';
+                    document.getElementById('personal_color_font').style.display = 'none';
+                    document.getElementById('font_pos').style.display = 'flex';
+                })
+                $('#save_pos_font').on('click', function(){
+                    let left = document.getElementById('font_pos_left').value;
+                    let top = document.getElementById('font_pos_top').value;
+                    if (left != '' && top != ''){
+                        fontLeft = Number(left);
+                        fontTop = Number(top);
+                    }
+                    document.getElementById('settings_window').style.display = 'none';
+                    document.getElementById('font_pos').style.display = 'none';
+                })
+                $('#cancel_pos_font').on('click', function(){
+                    document.getElementById('settings_window').style.display = 'none';
+                    document.getElementById('font_pos').style.display = 'none';
+                })
+                })
+                $('#settings_back').on('click', function(){
+                    document.getElementById('settings_window').style.display = 'none';
+                })
+                $('#change_settings_rect').on('click', function(){
+                    document.getElementById('rect_color_table').style.display = 'flex';
+                    document.getElementById('colors_rect').style.display = 'flex';
+                    
+                    $('#rect_color_save').on('click', function(){
+                    let color = document.getElementById('rect_color');
+                    rect_color = color.value;
+                    document.getElementById('settings_window').style.display = 'none';
+                    document.getElementById('rect_color_table').style.display = 'none';
+                    document.getElementById('colors_rect').style.display = 'none';
+                })
+                $('#rect_color_cancel').on('click', function(){
+                    document.getElementById('settings_window').style.display = 'none';
+                    document.getElementById('rect_color_table').style.display = 'none';
+                    document.getElementById('colors_rect').style.display = 'none';
+                })
+                $('#rect_person_color_button').on('click', function(){
+                    document.getElementById('settings_window').style.display = 'none';
+                    document.getElementById('colors_rect').style.display = 'none';
+                    document.getElementById('personal_color_rect').style.display = 'flex';
+                    document.getElementById('rect_pos').style.display = 'none';
+                })
+                $('#save_color_rect').on('click', function(){
+                    let color = document.getElementById('rect_color_text').value;
+                    if (color.includes('#')){
+                        rect_color = color;
+                    }
+                    document.getElementById('settings_window').style.display = 'none';
+                    document.getElementById('personal_color_rect').style.display = 'none';
+                })
+                $('#canel_color_rect').on('click', function(){
+                    document.getElementById('settings_window').style.display = 'none';
+                    document.getElementById('personal_color_rect').style.display = 'none';
+                })
+                $('#rect_person_pos_button').on('click', function(){
+                    document.getElementById('settings_window').style.display = 'none';
+                    document.getElementById('colors_rect').style.display = 'none';
+                    document.getElementById('personal_color_rect').style.display = 'none';
+                    document.getElementById('rect_pos').style.display = 'flex';
+                })
+                $('#save_pos_rect').on('click', function(){
+                    let left = document.getElementById('rect_pos_left').value;
+                    let top = document.getElementById('rect_pos_top').value;
+                    if (left != '' && top != ''){
+                        rectPosLeft = Number(left);
+                        rectPosTop = Number(top);
+                    }
+                    document.getElementById('settings_window').style.display = 'none';
+                    document.getElementById('rect_pos').style.display = 'none';
+                })
+                $('#cancel_pos_rect').on('click', function(){
+                    document.getElementById('settings_window').style.display = 'none';
+                    document.getElementById('rect_pos').style.display = 'none';
+                })
+            })
+            $('#change_settings_circle').on('click', function(){
+                    document.getElementById('circle_color_table').style.display = 'flex';
+                    document.getElementById('colors_circle').style.display = 'flex'; //!
+                    
+                    $('#circle_color_save').on('click', function(){
+                    let color = document.getElementById('colors_circle_choice');
+                    circle_color = color.value;
+                    document.getElementById('settings_window').style.display = 'none';
+                    document.getElementById('circle_color_table').style.display = 'none';
+                    document.getElementById('colors_circle').style.display = 'none';
+                })
+                $('#circle_color_cancel').on('click', function(){
+                    document.getElementById('settings_window').style.display = 'none';
+                    document.getElementById('circle_color_table').style.display = 'none';
+                    document.getElementById('colors_circle').style.display = 'none';
+                })
+                $('#circle_person_color_button').on('click', function(){
+                    document.getElementById('settings_window').style.display = 'none';
+                    document.getElementById('colors_circle').style.display = 'none';
+                    document.getElementById('personal_color_circle').style.display = 'flex';
+                    document.getElementById('circle_pos').style.display = 'none';
+                })
+                $('#save_color_circle').on('click', function(){
+                    let color = document.getElementById('circle_color_text').value;
+                    if (color.includes('#')){
+                        circle_color = color;
+                    }
+                    document.getElementById('settings_window').style.display = 'none';
+                    document.getElementById('personal_color_circle').style.display = 'none';
+                })
+                $('#canel_color_circle').on('click', function(){
+                    document.getElementById('settings_window').style.display = 'none';
+                    document.getElementById('personal_color_circle').style.display = 'none';
+                })
+                $('#circle_person_pos_button').on('click', function(){
+                    document.getElementById('settings_window').style.display = 'none';
+                    document.getElementById('colors_circle').style.display = 'none';
+                    document.getElementById('personal_color_circle').style.display = 'none';
+                    document.getElementById('circle_pos').style.display = 'flex';
+                })
+                $('#save_pos_circle').on('click', function(){
+                    let left = document.getElementById('circle_pos_left').value;
+                    let top = document.getElementById('circle_pos_top').value;
+                    if (left != '' && top != ''){
+                        circlePosLeft = Number(left);
+                        circlePosTop = Number(top);
+                    }
+                    document.getElementById('settings_window').style.display = 'none';
+                    document.getElementById('circle_pos').style.display = 'none';
+                })
+                $('#cancel_pos_circle').on('click', function(){
+                    document.getElementById('settings_window').style.display = 'none';
+                    document.getElementById('circle_pos').style.display = 'none';
+                })
+            })
+            })
+                console.log(fileInfo.name);
+            } 
+            });
+        </script>
+    </body>
+</html>
